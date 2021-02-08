@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Action Engine</title>
+        <script type="text/javascript" src="./classes/operateV2.js"></script>
+        <script type="text/javascript" src="./scripts/ActionEngine.js"></script>
+        <script type="text/javascript" src="./scripts/controller.js"></script>
+    </head>
+    <body>
+        <h1>Login Form</h1>
+        <p>Username:- ae,Password:- ae</p>
+        <form onsubmit="loginflow(event)">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="password" required>
+            <input type="submit" id="login" value="Login">
+        </form>
+        <p>Click on Login button then Start Execution</p>
+        <p>Start Execution changes state of first action step from WAIT to START</p>
+        <button onclick="ActionEngine.updateStartActionStep();">Start Execution</button>
+    </body>
+</html>
