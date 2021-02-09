@@ -1,3 +1,4 @@
+var loginActionFlow;
 function loginflow(event){
     event.preventDefault();
     var username = document.getElementById('username').value;
@@ -7,19 +8,22 @@ function loginflow(event){
         "username":username,
         "password":password
     }
-    var loginActionFlow = new ActionEngine({
+    loginActionFlow = new ActionEngine({
         actionSteps:[
             {
                 actionStepIndex:1,
                 method:checkCredetials,
-                state:states.WAIT,
+                state:states["shunya"],
                 arguments:data,
             },
             {
                 actionStepIndex:2,
                 method:this.alertAbout,
-                state:states.START,
-                required:{
+                state:states["0."],
+                condition:{
+                    completedActionSteps:[1]
+                },
+                fromPrevious:{
                     "exist":1
                 }
             },
@@ -36,8 +40,10 @@ function checkCredetials(data){
 function alertAbout(data){
     if(data.exist){
        alert('Entered correct crentials. :-)');
-    }else{
+    }else if(!data.exist){
         alert("Entered wrong crdentials .Try Again");
+    }else{
+        alert("Something is fishy.Have a look at the console.");
     }
    
 }

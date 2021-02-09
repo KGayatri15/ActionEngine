@@ -1,75 +1,79 @@
 const states = Object.freeze({
-    START: Symbol(" ActionStep Started"),//0.
-    WAIT: Symbol("Awaiting actionStep"),//shunya
-    EXECUTING: Symbol("ActionStep in process"),//dot
-    ERROR: Symbol("Error"),//e
-    DONE: Symbol("ActionStep done")//1
+    0.: Symbol("START"),//0.
+    shunya: Symbol("WAIT"),//shunya
+    dot: Symbol("EXECUTING"),//dot
+    e: Symbol("ERROR"),//e
+    1: Symbol("DONE")//1
 })
 class ActionEngine{
     constructor(options){
-        this.actionSteps = options.actionSteps
-        this.result = new Map()
-        this.actionStepsExecuted=[]
-        this.index
-        this.executeActionSteps(this.actionSteps)
+        this.actionSteps = options.actionSteps;
+        this.result = new Map(),
+        this.actionStepsExecuted=[],
+        this.index;
+        console.log(this.actionSteps);
+        this.executeActionSteps()
     }
     ActionStepError(index,exception){
-        this.updateActionStepState(index,states.ERROR);
+        this.updateActionStepState(index,states["e"]);
         console.log("An exception " + exception + " while performing the task " + ActionStepIndex);
     }
-    static updateStartActionStep(){
-        console.log("Now updating actionStep state to start " + this.index);
-        this.actionSteps[this.index]['state'] = states.START;
+    updateStartActionStep(){
+       console.log("Updating state of actionSteps Index " + this.index);
+       this.actionSteps[this.index]['state'] = states["0."];
     }
     updateActionStepState(index,state){
         this.actionSteps[index]['state'] = state;
     }   
-    executeActionSteps(actionSteps){
-        for(var i = 0 ;i< actionSteps.length;i++){
+   async executeActionSteps(){
+        for(var i = 0 ;i< this.actionSteps.length;i++){
             this.index = i;
-            console.log("The index of action Step " + this.index);
-            if(operate.isEqualStrict(actionSteps[i]['state'],states.WAIT))
-                console.log("Waiting: " + i);
+            console.log("At actionStep index:- " + i);
+            if(operate.isEqualStrict(this.actionSteps[i]['state'],states["shunya"])){
+                console.log("Waiting");
+                await this.sleep(2000)
+                    .then( ()=>{ i = --i ;  console.log("After timeout:- " + i);})
+            }
             else{
-                this.updateActionStepState(i,states.EXECUTING);
-                var conditionExists = operate.isEqualStrict( actionSteps[i]['condition'],undefined);
-                var checkSubset = conditionExists|| operate.isEqualStrict(actionSteps[i]['condition']['completedActionSteps'],undefined) || operate.hasAllof(actionSteps[i]['condition']['completedActionSteps'],this.actionStepsExecuted);
-                var comparisonsCorrect = conditionExists|| operate.isEqualStrict(actionSteps[i]['condition']['compare'],undefined)|| this.compareValues(actionSteps[i]['condition']['compare']);
+                this.updateActionStepState(i,states["dot"]);
+                var conditionExists = operate.isEqualStrict( this.actionSteps[i]['condition'],undefined);
+                var checkSubset = conditionExists|| operate.isEqualStrict(this.actionSteps[i]['condition']['completedActionSteps'],undefined) || operate.hasAllof(this.actionSteps[i]['condition']['completedActionSteps'],this.actionStepsExecuted);
+                var comparisonsCorrect = conditionExists|| operate.isEqualStrict(this.actionSteps[i]['condition']['compare'],undefined)|| this.compareValues(this.actionSteps[i]['condition']['compare']);
                 if(checkSubset && comparisonsCorrect){
                         var input, noInput = false;
-                        var argumentsExist = operate.isEqualStrict(actionSteps[i]['arguments'],undefined);
-                        var requiredArgumentsExist = operate.isEqualStrict(actionSteps[i]['required'],undefined);
+                        var argumentsExist = operate.isEqualStrict(this.actionSteps[i]['arguments'],undefined);
+                        var requiredArgumentsExist = operate.isEqualStrict(this.actionSteps[i]['fromPrevious'],undefined);
                         if(argumentsExist && requiredArgumentsExist )
                             noInput = true;
                         else if(argumentsExist)
-                            input = this.includeArguments({},actionSteps[i]['required'])
+                            input = this.includeArguments({},this.actionSteps[i]['fromPrevious'])
                         else if(requiredArgumentsExist)
-                            input = this.includeArguments(actionSteps[i]['arguments'],{})
+                            input = this.includeArguments(this.actionSteps[i]['arguments'],{})
                         else
-                            input = this.includeArguments(actionSteps[i]['arguments'],actionSteps[i]['required'])
+                            input = this.includeArguments(this.actionSteps[i]['arguments'],this.actionSteps[i]['fromPrevious'])
                         try{
                             if(noInput)
-                                this.result[actionSteps[i]['actionStepIndex']] = actionSteps[i]['method'].call(this);
+                                this.result[this.actionSteps[i]['actionStepIndex']] = this.actionSteps[i]['method'].call(this);
                             else
-                                this.result[actionSteps[i]['actionStepIndex']] = actionSteps[i]['method'].call(this,input);
-                            this.actionStepsExecuted.push(actionSteps[i]['actionStepIndex']);
-                            this.updateActionStepState(i,states.DONE);
+                                this.result[this.actionSteps[i]['actionStepIndex']] = this.actionSteps[i]['method'].call(this,input);
+                            this.actionStepsExecuted.push(this.actionSteps[i]['actionStepIndex']);
+                            this.updateActionStepState(i,states["1"]);
                         }catch(exception){
-                            this.ActionStepError(actionSteps[i],exception);
+                            this.ActionStepError(this.actionSteps[i],exception);
                         }
                 }
+                console.log("Completed Tasks till now" + this.actionStepsExecuted);
             }
-            if(actionSteps[i]['state'] === states.WAIT){
-                setTimeout(console.log("Retry Again"),1000)
-                i = --i;
-                console.log("After timeout:- " + i);
-            }
-            if(operate.isEqualStrict(actionSteps.length -1,i)){
+            if(operate.isEqualStrict(this.actionSteps.length -1,i) && this.actionSteps[this.actionSteps.length-1]['state'] !== states["shunya"]){
                 console.log("Execution of workflow is done");
             }
         }
         console.log(this.actionStepsExecuted);
     }
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+      
     includeArguments(arg,obj){
         for(var key in obj){
             arg[key] = this.result[obj[key]];
