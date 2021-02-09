@@ -8,7 +8,7 @@ const states = Object.freeze({
 class ActionEngine{
     constructor(options){
         this.actionSteps = options.actionSteps;
-        this.result = new Map(),
+        this.actionStepData = new Map(),
         this.actionStepsExecuted=[],
         this.index;
         console.log(this.actionSteps);
@@ -16,7 +16,7 @@ class ActionEngine{
     }
     ActionStepError(index,exception){
         this.updateActionStepState(index,states["e"]);
-        console.log("An exception " + exception + " while performing the task " + ActionStepIndex);
+        console.log("An exception " + exception + " while performing the task " + index);
     }
     updateStartActionStep(){
        console.log("Updating state of actionSteps Index " + this.index);
@@ -53,13 +53,13 @@ class ActionEngine{
                             input = this.includeArguments(this.actionSteps[i]['arguments'],this.actionSteps[i]['fromPrevious'])
                         try{
                             if(noInput)
-                                this.result[this.actionSteps[i]['actionStepIndex']] = this.actionSteps[i]['method'].call(this);
+                                this.actionStepData[this.actionSteps[i]['actionStepIndex']] = this.actionSteps[i]['method'].call(this);
                             else
-                                this.result[this.actionSteps[i]['actionStepIndex']] = this.actionSteps[i]['method'].call(this,input);
+                                this.actionStepData[this.actionSteps[i]['actionStepIndex']] = this.actionSteps[i]['method'].call(this,input);
                             this.actionStepsExecuted.push(this.actionSteps[i]['actionStepIndex']);
                             this.updateActionStepState(i,states["1"]);
                         }catch(exception){
-                            this.ActionStepError(this.actionSteps[i],exception);
+                            this.ActionStepError(i,exception);
                         }
                 }
                 console.log("Completed Tasks till now" + this.actionStepsExecuted);
@@ -73,10 +73,9 @@ class ActionEngine{
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
-      
     includeArguments(arg,obj){
         for(var key in obj){
-            arg[key] = this.result[obj[key]];
+                arg[key] = this.actionStepData[obj[key]];
         }
         return arg;
     }
