@@ -6,30 +6,23 @@ const states = Object.freeze({
     1: Symbol("DONE")//1
 })
 class ActionEngine{
-    constructor(options){
-        this.actionSteps = options.actionSteps;
-        this.actionStepData = {},
-        this.actionStepsExecuted=[],
-        this.index;
-        console.log(this.actionSteps);
-        this.intialise();
+    constructor(actionFlow){
+        this.actionSteps = actionFlow.actionSteps;
+        this.actionStepData = {}, this.intialise();
+        this.actionStepsExecuted=[],this.index;
         this.executeActionSteps()
     }
-    ActionStepError(index,exception){
-        this.updateActionStepState(index,states["e"]);
+    ActionStepError(exception){
+        this.updateState(states["e"]);
         console.log("An exception " + exception + " while performing the task " + this.actionSteps[index]['actionStepIndex']);
     }
     updateActionStepArguments(data){
-       console.log("Updating arguments of actionSteps Index " + this.index);
-       this.includeArguments(this.index,data,"Include");
-       this.updateActionStepState(this.index,states["0."]);
+       console.log("Updating arguments and state of actionStep array Index " + this.index);
+       this.includeArguments(data,"Include");
+       this.updateState(states["0."]);
     }
-    updateStateOfActionStep(){
-        console.log("Updating state of actionSteps Index " + this.index);
-        this.updateActionStepState(this.index,states["0."]);
-     }
-    updateActionStepState(index,state){
-        this.actionSteps[index]['state'] = state;
+    updateState(state){
+        this.actionSteps[this.index]['state'] = state;
     }   
    async executeActionSteps(){
         for(var i = 0 ;i< this.actionSteps.length;i++){
@@ -41,7 +34,7 @@ class ActionEngine{
                     .then( ()=>{ i = --i ;  console.log("After timeout:- " + i);})
             }
             else{
-                this.updateActionStepState(i,states["dot"]);
+                this.updateState(states["dot"]);
                 var conditionExists = operate.isEqualStrict( this.actionSteps[i]['condition'],undefined);
                 var checkSubset = conditionExists|| operate.isEqualStrict(this.actionSteps[i]['condition']['completedActionSteps'],undefined) || operate.hasAllof(this.actionSteps[i]['condition']['completedActionSteps'],this.actionStepsExecuted);
                 var comparisonsCorrect = conditionExists|| operate.isEqualStrict(this.actionSteps[i]['condition']['compare'],undefined)|| this.compareValues(this.actionSteps[i]['condition']['compare']);
@@ -52,18 +45,18 @@ class ActionEngine{
                         if(Noarguments && NofromPrevious && operate.isEqualStrict(this.actionStepData[this.actionSteps[i]['actionStepIndex']]['arguments'],{}))
                             noInput = true;
                         if(!Noarguments)
-                            this.includeArguments(i,this.actionSteps[i]['arguments'],'Include')
+                            this.includeArguments(this.actionSteps[i]['arguments'],'Include')
                         if(!NofromPrevious)
-                            this.includeArguments(i,this.actionSteps[i]['fromPrevious'],'Previous')
+                            this.includeArguments(this.actionSteps[i]['fromPrevious'],'Previous')
                         try{
                             if(noInput)
                                 this.actionStepData[this.actionSteps[i]['actionStepIndex']]['output'] = this.actionSteps[i]['method'].call(this);
                             else
                                 this.actionStepData[this.actionSteps[i]['actionStepIndex']]['output'] = this.actionSteps[i]['method'].call(this,this.actionStepData[this.actionSteps[i]['actionStepIndex']]['arguments']);
                             this.actionStepsExecuted.push(this.actionSteps[i]['actionStepIndex']);
-                            this.updateActionStepState(i,states["1"]);
+                            this.updateState(states["1"]);
                         }catch(exception){
-                            this.ActionStepError(i,exception);
+                            this.ActionStepError(exception);
                         }
                 }
                 console.log("Completed Tasks till now" + this.actionStepsExecuted);
@@ -77,12 +70,12 @@ class ActionEngine{
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
-    includeArguments(index,obj,from){
+    includeArguments(obj,from){
         for(var key in obj){
             if(operate.isEqualStrict(from,"Previous"))
-                this.actionStepData[this.actionSteps[index]['actionStepIndex']]['arguments'][key]  = this.actionStepData[obj[key]]['output'];
+                this.actionStepData[this.actionSteps[this.index]['actionStepIndex']]['arguments'][key]  = this.actionStepData[obj[key]]['output'];
             else if(operate.isEqualStrict(from,"Include"))
-                this.actionStepData[this.actionSteps[index]['actionStepIndex']]['arguments'][key] = obj[key];
+                this.actionStepData[this.actionSteps[this.index]['actionStepIndex']]['arguments'][key] = obj[key];
         }
         console.log("Included arguments as mentioned");
     }
