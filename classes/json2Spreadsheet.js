@@ -10,7 +10,7 @@ var info = {
     },
 }
 class JSON2Spreadsheet{
-    static handleActions(event,type){
+    static  handleActions(event,type){
         event.preventDefault();var body;
         var header = info['spreadsheet']['headers'];
         header['Authorization'] = authorization;

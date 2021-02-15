@@ -37,10 +37,10 @@ class HttpService{
             return (HttpService.fetchRequest(url,HttpService.requestBuilder(type,header,multipartRequestBody)));
        }
     }
-    static async fetchRequest(url,request){
+    static fetchRequest(url,request){
     console.log("URL :-" + url);
     console.log("Request method :" + request['method'] + "headers:" + request['headers']['Authorization'] + "body: " + request['body']);
-    await fetch(url,request)
+    fetch(url,request)
            .then(response=>{console.log(response);return response.json()})
            .then(data=>{
                console.log(data);

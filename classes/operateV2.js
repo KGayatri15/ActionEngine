@@ -53,9 +53,33 @@ class conductor {
         return response;
     }
 
-    static conductForEachFlow(a, b, options) {
-
-
+    static conductForEachFlow(callbackClass,callback,options) {
+            var orderOfParams = this.getParams(callbackClass[callback]);
+            var input = [];
+            for(var param in orderOfParams){
+                input.push(options[param]);
+            }
+            console.log(input);
+            var response = callbackClass[callback].apply(null,arguments);
+            return response;
+    }
+    static getParams(func){
+         // String representaation of the function code 
+         console.log(func);
+         var str = func.toString(); 
+         console.log("String :- " + str);
+         str = str.replace(/\/\*[\s\S]*?\*\//g, '')  
+                 .replace(/\/\/(.)*/g, '')          
+                 .replace(/{[\s\S]*}/, '') 
+                 .replace(/=>/g, '') 
+                 .trim(); 
+         // Start parameter names after first '(' 
+         var start = str.indexOf("(") + 1;   
+         // End parameter names is just before last ')' 
+         var end = str.length - 1;    
+         var result = [];    
+         result = str.substring(start, end).split(",");       
+         return result;
     }
 }
 

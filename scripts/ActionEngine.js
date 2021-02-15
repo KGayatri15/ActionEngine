@@ -14,7 +14,7 @@ class ActionEngine{
     }
     ActionStepError(exception){
         this.updateState(states["e"]);
-        console.log("An exception " + exception + " while performing the task " + this.actionSteps[index]['actionStepIndex']);
+        console.log("An exception " + exception + " while performing the task " + this.actionSteps[this.index]['actionStepIndex']);
     }
     updateActionStepArguments(data){
        console.log("Updating arguments and state of actionStep array Index " + this.index);
@@ -39,24 +39,23 @@ class ActionEngine{
                 var checkSubset = conditionExists|| operate.isEqualStrict(this.actionSteps[i]['condition']['completedActionSteps'],undefined) || operate.hasAllof(this.actionSteps[i]['condition']['completedActionSteps'],this.actionStepsExecuted);
                 var comparisonsCorrect = conditionExists|| operate.isEqualStrict(this.actionSteps[i]['condition']['compare'],undefined)|| this.compareValues(this.actionSteps[i]['condition']['compare']);
                 if(checkSubset && comparisonsCorrect){
-                        var  noInput = false;
                         var Noarguments = operate.isEqualStrict(this.actionSteps[i]['arguments'],undefined);
                         var NofromPrevious = operate.isEqualStrict(this.actionSteps[i]['fromPrevious'],undefined);
-                        if(Noarguments && NofromPrevious && operate.isEqualStrict(this.actionStepData[this.actionSteps[i]['actionStepIndex']]['arguments'],{}))
-                            noInput = true;
                         if(!Noarguments)
                             this.includeArguments(this.actionSteps[i]['arguments'],'Include')
                         if(!NofromPrevious)
                             this.includeArguments(this.actionSteps[i]['fromPrevious'],'Previous')
+                        var arr = [];
+                        arr = this.actionSteps[i]['method'].split(".");
+                        console.log(arr[0] + "::" + arr[1] + " and it's type:-" + typeof(arr[0]));
                         try{
-                            if(noInput)
-                                this.actionStepData[this.actionSteps[i]['actionStepIndex']]['output'] = this.actionSteps[i]['method'].call(this);
-                            else
-                                this.actionStepData[this.actionSteps[i]['actionStepIndex']]['output'] = this.actionSteps[i]['method'].call(this,this.actionStepData[this.actionSteps[i]['actionStepIndex']]['arguments']);
+                            this.actionStepData[this.actionSteps[i]['actionStepIndex']]['output'] = conductor.conductForEachFlow(arr[0],arr[1],this.actionStepData[this.actionSteps[i]['actionStepIndex']]['arguments']);
                             this.actionStepsExecuted.push(this.actionSteps[i]['actionStepIndex']);
                             this.updateState(states["1"]);
                         }catch(exception){
+
                             this.ActionStepError(exception);
+                            throw new Error(exception);
                         }
                 }
                 console.log("Completed Tasks till now" + this.actionStepsExecuted);

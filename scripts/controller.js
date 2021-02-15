@@ -1,4 +1,9 @@
 var loginActionFlow,signUpActionFlow;
+function loadData(event){
+    event.preventDefault();
+    var json = {uri:window.location.href};
+    SpreadsheetActionFlow.updateActionStepArguments(json);
+}
 //SIGNUP
 function signup(event){
     event.preventDefault();
@@ -6,12 +11,12 @@ function signup(event){
         actionSteps:[
             {
                 actionStepIndex:1,
-                method:checkUserExists,
+                method:"checkUserExists",
                 state:states["shunya"],
             },
             {
                 actionStepIndex:2,
-                method:alertAboutSignUp,
+                method:"alertAboutSignUp",
                 state:states["0."],
                 condition:{
                     completedActionSteps:[1]
@@ -21,7 +26,7 @@ function signup(event){
                 }
             }
         ]
-    })
+    });
 }
 function startExecutionSignupFlow(event){
     event.preventDefault();
@@ -54,12 +59,12 @@ function login(event){
         actionSteps:[
             {
                 actionStepIndex:1,
-                method:checkCredetials,
+                method:"checkCredetials",
                 state:states["shunya"],
             },
             {
                 actionStepIndex:2,
-                method:alertAboutLogin,
+                method:"alertAboutLogin",
                 state:states["0."],
                 condition:{
                     completedActionSteps:[1]
@@ -69,7 +74,7 @@ function login(event){
                 }
             },
         ]
-    })
+    });
 }
 function startExecutionLoginFlow(event){
     event.preventDefault();

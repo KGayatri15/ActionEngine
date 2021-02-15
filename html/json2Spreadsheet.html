@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Action Engine</title>
+        <script type="text/javascript" src="../classes/operateV2.js"></script>
+        <script type="text/javascript" src="../scripts/ActionEngine.js"></script>
+        <script type="text/javscript" src ="../classes/Authorization.js"></script>
+        <script type="text/javascript" src="../scripts/SpreadsheetFlow.js"></script>
+        <script type="text/javascript" src="../scripts/controller.js"></script>
+    </head>
+    <body onload="loadData(event);">
+        <h3>Note:- </h3>
+        <p>Click on Sign Up/Login then Start Execution for Login/Signup</p>
+        <p><b>Start Execution for Login/Signup</b> changes state of first action step from WAIT to START and passes arguments {username,password} during runtime</p>
+        <h1>SignUp Form</h1>
+        <form onsubmit="signup(event)">
+            <input type="text" id="Rusername" placeholder="Username" required>
+            <input type="password" id="Rpassword" placeholder="password" required>
+            <input type="submit" value="SignUp">
+        </form>
+        <button onclick="startExecutionSignupFlow(event);">Start Execution for SignUp</button>
+        <h1>Login Form</h1>
+        <form onsubmit="login(event)">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="password" required>
+            <input type="submit" value="Login">
+        </form>
+        <button onclick="startExecutionLoginFlow(event);">Start Execution for Login</button>
+    </body>
+</html>

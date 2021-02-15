@@ -127,9 +127,10 @@ class mutate {
         return output
     }
     static arr2Object (input ,parent,output){
-        for(var j in input){
+        for(var j in input){ 
+         var index;        
           if(input[j][2] === parent[3]&&((input[j][5].includes(parent[5]) && input[j][1] === 1+ parent[1])||(input[j][1]===1&&parent[1]==="d"))){
-            if(parent[4] === "Array" && input[j][4] === "String"){
+            if(parent[4] === "Array" && (input[j][4] === "String"|| input[j][4] === "Number")){
               output.unshift(input[j][3]);
             }else if(input[j][4] === "Object"){
                 var obj = {};
@@ -139,14 +140,18 @@ class mutate {
                             obj[input[0][k]] = input[j][k];
                     }
                 }
-                if(parent[4]=== "Array")
+                if(parent[4]=== "Array"){
+                        var index = input[j][3].replace(input[j][2],"");
                         output.unshift(obj);
-                else
+                }else
                         output[input[j][3]] = obj;
             }else if(input[j][4] === "Array"){
               output[input[j][3]] = [];
             }
-            this.arr2Object(input,input[j],output[input[j][3]]);
+            if(input[j][4] === "Object" && parent[4] === "Array")
+                this.arr2Object(input,input[j],output[index]);
+            else
+                this.arr2Object(input,input[j],output[input[j][3]]);
           }
         }
         return output;
@@ -154,12 +159,14 @@ class mutate {
 }
 
 function start1() {
-    var input = schema1;
+   
     console.log("Input:- Object To Array");
-    console.log(input);
-    var outputArray = mutate.Obj2(input, []);
+    console.log(actionflowSample);
+    var outputArray = mutate.Obj2(actionflowSample, []);
     console.log("output Array[Input:- Array To Object] ", outputArray);
+    document.getElementById('opArray').value = outputArray;
     var outputJson = mutate.arr2Object(outputArray,outputArray[0] ,{});
     console.log("Output :- Array To Object");
     console.log(outputJson);
+    document.getElementById('opJSON').value = outputJson;
 }
